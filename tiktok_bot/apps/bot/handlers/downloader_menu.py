@@ -7,6 +7,8 @@ from loguru import logger
 from tiktok_downloader import snaptik
 
 from tiktok_bot.apps.bot.filters.base_filters import UserFilter
+from tiktok_bot.apps.bot.handlers.utils import channel_status_check
+from tiktok_bot.config.config import config
 from tiktok_bot.db.models import User
 
 router = Router()
@@ -24,10 +26,14 @@ def download_file(video_url) -> bytes:
 
 async def download(message: types.Message, user: User, state: FSMContext):
     await state.clear()
+
     if user.is_search:
         await message.answer("Ожидайте загрузки предыдущего видео...")
         return
-
+    if not await channel_status_check(message.from_user.id):
+        channels = "\n".join(config.bot.chats)
+        await message.answer(f"Для того, чтобы пользоваться ботом, нужно подписаться на каналы:\n{channels}")
+        return
     async with user:
         try:
             await message.answer("Скачиваю видео...")

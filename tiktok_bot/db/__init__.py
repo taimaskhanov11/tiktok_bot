@@ -1,5 +1,6 @@
 import asyncio
 
+import asyncpg
 from loguru import logger
 from tortoise import Tortoise
 

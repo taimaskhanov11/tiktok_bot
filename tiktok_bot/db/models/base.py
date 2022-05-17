@@ -3,7 +3,23 @@ from tortoise import fields, models
 
 __all__ = (
     "User",
+    "Chat"
 )
+
+from tiktok_bot.config.config import config
+
+
+class Chat(models.Model):
+    link = fields.CharField(100, index=True)
+
+    @classmethod
+    async def create(cls, **kwargs):
+        config.bot.chats.append(kwargs.get("link"))
+        return await super().create(**kwargs)
+
+    async def delete(self, using_db=None) -> None:
+        config.bot.chats.remove(self.link)
+        return await super().delete(using_db)
 
 
 class User(models.Model):

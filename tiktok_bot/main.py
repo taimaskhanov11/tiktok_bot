@@ -1,13 +1,14 @@
 import asyncio
 import logging
 
-from aiogram import Bot
+from aiogram import Bot, F
 from aiogram.types import BotCommand
 
 from tiktok_bot.apps.bot.handlers.admin_handlers.admin_menu import register_admin
 from tiktok_bot.apps.bot.handlers.common_menu import register_common
 from tiktok_bot.apps.bot.handlers.downloader_menu import register_downloader
 from tiktok_bot.apps.bot.handlers.errors_handlers import register_error
+from tiktok_bot.apps.bot.utils.init import init_chats
 from tiktok_bot.config.config import config
 from tiktok_bot.config.logg_settings import init_logging
 from tiktok_bot.db import init_db
@@ -33,7 +34,7 @@ async def start():
         steaming=True,
         write=True,
     )
-    
+
     # dp.startup.register(on_startup)
     # dp.shutdown.register(on_shutdown)
 
@@ -44,7 +45,7 @@ async def start():
     await init_db(**config.db.dict())
 
     # Меню админа
-
+    dp.message.filter(F.chat.type == "private")
     # Регистрация хэндлеров
     register_admin(dp)
     register_downloader(dp)
@@ -54,6 +55,7 @@ async def start():
 
     # Регистрация фильтров
 
+    await init_chats()
     await dp.start_polling(bot, skip_updates=True)
 
 

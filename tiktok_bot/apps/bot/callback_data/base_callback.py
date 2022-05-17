@@ -5,3 +5,8 @@ from aiogram.dispatcher.filters.callback_data import CallbackData
 class UserCallback(CallbackData, prefix="user"):
     pk: int
     action: str
+
+
+class ChatCallback(CallbackData, prefix="chat"):
+    pk: int
+    action: str

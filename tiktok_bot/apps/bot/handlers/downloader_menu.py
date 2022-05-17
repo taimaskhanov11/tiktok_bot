@@ -24,23 +24,28 @@ def download_file(video_url) -> bytes:
 
 async def download(message: types.Message, user: User, state: FSMContext):
     await state.clear()
-    await message.answer("Ожидайте...")
-    try:
-        await message.answer("Скачиваю видео...")
-        bytes_storage = await asyncio.to_thread(download_file, message.text)
-        await message.answer_video(
-            BufferedInputFile(bytes_storage,
-                              filename=f"result_{message.from_user.id}.mp4"),
-            caption="Вот твое видео: скачано с помощью @tiktokksave_bot")
+    if user.is_search:
+        await message.answer("Ожидайте загрузки предыдущего видео...")
+        return
 
-        await message.answer("Скачиваю музыку из видео...")
-        await message.answer_audio(
-            BufferedInputFile(bytes_storage,
-                              filename=f"result_{message.from_user.id}.mp4"),
-            caption="Вот музыка из видео: скачано с помощью @tiktokksave_bot")
-    except Exception as e:
-        logger.error(e)
-        await message.answer("Ошибка при скачивании, неверная ссылка, видео было удалено или я его не нашел.")
+    async with user:
+        try:
+            await message.answer("Скачиваю видео...")
+            await message.answer("Ожидайте...")
+            bytes_storage = await asyncio.to_thread(download_file, message.text)
+            await message.answer_video(
+                BufferedInputFile(bytes_storage,
+                                  filename=f"result_{message.from_user.id}.mp4"),
+                caption="Вот твое видео: скачано с помощью @tiktokksave_bot")
+
+            await message.answer("Скачиваю музыку из видео...")
+            await message.answer_audio(
+                BufferedInputFile(bytes_storage,
+                                  filename=f"result_{message.from_user.id}.mp4"),
+                caption="Вот музыка из видео: скачано с помощью @tiktokksave_bot")
+        except Exception as e:
+            logger.error(e)
+            await message.answer("Ошибка при скачивании, неверная ссылка, видео было удалено или я его не нашел.")
 
 
 def register_downloader(dp: Dispatcher):

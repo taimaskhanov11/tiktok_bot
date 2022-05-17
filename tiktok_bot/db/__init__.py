@@ -23,7 +23,7 @@ async def init_db(username, password, host, port, db_name):
     }
     try:
         await Tortoise.init(**data)
-    except Exception as e:
+    except asyncpg.exceptions.DuplicateDatabaseError as e:
         logger.critical(e)
         await Tortoise.init(
             **data,

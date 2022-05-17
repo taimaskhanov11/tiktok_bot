@@ -1,0 +1,9 @@
+bot:
+  token: your_token
+  admins:
+db:
+  username: sektor007
+  password: password
+  host: sektor007.mysql.pythonanywhere-services.com
+  port: 3306
+  db_name: tiktok_bot

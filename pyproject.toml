@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "tiktok_bot"
+version = "0.1.0"
+description = ""
+authors = ["Rasul Taimaskhanov <81189712+taimaskhanov11@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiogram = {version = "^3.0.0b3", allow-prereleases = true, extras = ["i18n"]}
+loguru = "^0.6.0"
+pydantic = "^1.9.0"
+tortoise-orm = {extras = ["aiomysql"], version = "^0.19.0"}
+PyYAML = "^6.0"
+tiktok-downloader = "^0.3.3"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

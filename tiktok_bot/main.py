@@ -47,9 +47,9 @@ async def start():
     # Меню админа
     dp.message.filter(F.chat.type == "private")
     # Регистрация хэндлеров
+    register_common(dp)
     register_admin(dp)
     register_downloader(dp)
-    register_common(dp)
     register_error(dp)
     # Регистрация middleware
 

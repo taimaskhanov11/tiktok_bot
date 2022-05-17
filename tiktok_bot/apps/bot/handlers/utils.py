@@ -30,7 +30,7 @@ async def channel_status_check(user_id):
                 else:
                     results.append(False)
             except Exception as e:
-                logger.critical(e)
+                logger.trace(e)
                 results.append(True)
         return all(results)
     else:

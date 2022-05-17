@@ -2,7 +2,6 @@ from aiogram import Dispatcher, Router, types
 from aiogram.dispatcher.fsm.context import FSMContext
 
 from tiktok_bot.apps.bot import const
-from tiktok_bot.apps.bot import markups
 from tiktok_bot.apps.bot.filters.base_filters import UserFilter
 from tiktok_bot.apps.bot.handlers.utils import channel_status_check
 from tiktok_bot.config.config import config

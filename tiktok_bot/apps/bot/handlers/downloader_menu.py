@@ -27,9 +27,9 @@ def download_file(video_url) -> bytes:
 async def download(message: types.Message, user: User, state: FSMContext):
     await state.clear()
 
-    if user.is_search:
-        await message.answer("Ожидайте загрузки предыдущего видео...")
-        return
+    # if user.is_search:
+    #     await message.answer("Ожидайте загрузки предыдущего видео...")
+    #     return
     if not await channel_status_check(message.from_user.id):
         channels = "\n".join(config.bot.chats)
         await message.answer(f"Для того, чтобы пользоваться ботом, нужно подписаться на каналы:\n{channels}")

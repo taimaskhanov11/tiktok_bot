@@ -18,7 +18,7 @@ MODELS_DIR = "tiktok_bot.db.models"
 async def init_db(username, password, host, port, db_name):
     logger.debug(f"Инициализация BD {host}")
     data = {
-        "db_url": f"mysql://{username}:{password}@{host}:{port}/{db_name}",
+        "db_url": f"postgres://{username}:{password}@{host}:{port}/{db_name}",
         "modules": {"models": [MODELS_DIR]},
     }
     try:

@@ -6,4 +6,9 @@
 --------------------
 для импорта данных в json
 poetry run python tiktok_bot/db/utils/backup.py
+
+для импорта данных в txt
+poetry run python tiktok_bot/db/utils/import.py
+
+
 --------------------

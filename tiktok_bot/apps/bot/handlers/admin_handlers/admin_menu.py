@@ -84,7 +84,7 @@ async def send_mail_done(message: types.Message, state: FSMContext):
     users = await User.all()
     for user in users:
         try:
-            await bot.send_message(user.user_id, message.text, "markdown")
+            await bot.send_message(user.user_id, message.text, "html")
         except Exception as e:
             logger.warning(e)
     await message.answer(f"Рассылка отправлена {len(users)} пользователям")

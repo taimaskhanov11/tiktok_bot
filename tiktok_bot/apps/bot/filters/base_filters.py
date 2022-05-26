@@ -1,7 +1,10 @@
 from aiogram import types
 from aiogram.dispatcher.filters import BaseFilter
-from tiktok_bot.db.models import User
 from loguru import logger
+
+from tiktok_bot.apps.bot.handlers.utils import channel_status_check
+from tiktok_bot.config.config import config
+from tiktok_bot.db.models import User
 
 
 class UserFilter(BaseFilter):
@@ -19,3 +22,12 @@ class UserFilter(BaseFilter):
         if is_new:
             logger.info(f"Новый пользователь {user=}")
         return {"user": user}
+
+
+class ChannelSubscriptionFilter(BaseFilter):
+    async def __call__(self, message: types.Message):
+        if await channel_status_check(message.from_user.id):
+            return True
+        channels = "\n".join(config.bot.chats)
+        await message.answer(f"Для того, чтобы пользоваться ботом, нужно подписаться на каналы:\n{channels}")
+        return False

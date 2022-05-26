@@ -1,5 +1,4 @@
 import asyncio
-import collections
 
 from loguru import logger
 

@@ -6,9 +6,7 @@ from aiogram.types import BufferedInputFile
 from loguru import logger
 from tiktok_downloader import snaptik
 
-from tiktok_bot.apps.bot.filters.base_filters import UserFilter
-from tiktok_bot.apps.bot.handlers.utils import channel_status_check
-from tiktok_bot.config.config import config
+from tiktok_bot.apps.bot.filters.base_filters import UserFilter, ChannelSubscriptionFilter
 from tiktok_bot.db.models import User
 
 router = Router()
@@ -26,18 +24,10 @@ def download_file(video_url) -> bytes:
 
 async def download(message: types.Message, user: User, state: FSMContext):
     await state.clear()
-
-    # if user.is_search:
-    #     await message.answer("Ожидайте загрузки предыдущего видео...")
-    #     return
-    if not await channel_status_check(message.from_user.id):
-        channels = "\n".join(config.bot.chats)
-        await message.answer(f"Для того, чтобы пользоваться ботом, нужно подписаться на каналы:\n{channels}")
-        return
+    # todo 5/26/2022 7:59 PM taima: Сделать что нибудь с спамом
     async with user:
         try:
-            await message.answer("Скачиваю видео...")
-            await message.answer("Ожидайте...")
+            await message.answer("Скачиваю видео, ожидайте...")
             bytes_storage = await asyncio.to_thread(download_file, message.text)
             await message.answer_video(
                 BufferedInputFile(bytes_storage,
@@ -50,7 +40,7 @@ async def download(message: types.Message, user: User, state: FSMContext):
                                   filename=f"result_{message.from_user.id}.mp4"),
                 caption="Вот музыка из видео: скачано с помощью @tiktokksave_bot")
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             await message.answer("Ошибка при скачивании, неверная ссылка, видео было удалено или я его не нашел.")
 
 
@@ -60,4 +50,4 @@ def register_downloader(dp: Dispatcher):
     callback = router.callback_query.register
     message = router.message.register
 
-    message(download, UserFilter(), text_contains="tiktok.com", state="*")
+    message(download, UserFilter(), ChannelSubscriptionFilter(), text_contains="tiktok.com", state="*")

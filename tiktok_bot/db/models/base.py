@@ -40,6 +40,6 @@ class User(models.Model):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         # Отключение режима поиска
         self.is_search = False
-        await self.save()
+        await self.save(update_fields=["is_search"])
         if exc_type:
             logger.exception(f"{exc_type}, {exc_val}, {exc_tb}")

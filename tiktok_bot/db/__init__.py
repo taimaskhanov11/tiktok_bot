@@ -33,5 +33,6 @@ async def init_db(username, password, host, port, db_name):
     await Tortoise.generate_schemas()
     logger.debug(f"База данных {db_name} инициализирована")
 
+
 if __name__ == '__main__':
     asyncio.run(init_db(**config.db.dict()))

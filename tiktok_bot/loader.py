@@ -5,9 +5,12 @@ from loguru import logger
 from tiktok_bot.config.config import config
 
 logger.info(config.bot.token)
-bot = Bot(token=config.bot.token)
+bot = Bot(token=config.bot.token,
+          # parse_mode="markdown"
+          )
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
+
 
 # i18n = setup_lang_middleware(dp)
 # _ = i18n.gettext

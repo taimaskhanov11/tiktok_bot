@@ -8,11 +8,13 @@ from tiktok_bot.apps.bot.handlers.admin import register_admin_handlers
 from tiktok_bot.apps.bot.handlers.common.common_menu import register_common
 from tiktok_bot.apps.bot.handlers.common.downloader_menu import register_downloader
 from tiktok_bot.apps.bot.handlers.errors_handlers import register_error
-from tiktok_bot.apps.bot.utils.init import init_chats
+from tiktok_bot.apps.bot.middleware.bot_middleware import BotMiddleware
+from tiktok_bot.apps.bot.utils.base import init_chats
 from tiktok_bot.config.config import config
 from tiktok_bot.config.logg_settings import init_logging
 from tiktok_bot.db import init_db
-from tiktok_bot.loader import bot, dp
+from tiktok_bot.db.models import User
+from tiktok_bot.loader import bot, dp, scheduler
 
 
 async def set_commands(bot: Bot):
@@ -54,11 +56,14 @@ async def start():
     register_error(dp)
     # Регистрация middleware
     # dp.message.middleware(CounterMiddleware())
-    # todo 5/26/2022 8:47 PM taima: добавить миддлваре
-    # dp.message.outer_middleware(CounterMiddleware())
+    middleware = BotMiddleware()
+    dp.message.outer_middleware(middleware)
+    dp.callback_query.outer_middleware(middleware)
+    # dp.message.middleware(BotMiddleware())
     # Регистрация фильтров
-
     await init_chats()
+    scheduler.start()
+    scheduler.add_job(User.reset_is_search, "interval", minutes=1)
     await dp.start_polling(bot, skip_updates=True)
 
 

@@ -33,7 +33,6 @@ def parse_config():
 class Bot(BaseModel):
     token: str
     admins: Optional[list[int]]
-    chats: Optional[list[str]]
 
 
 class Database(BaseModel):

@@ -13,6 +13,8 @@ tortoise-orm = {extras = ["asyncpg"], version = "^0.19.0"}
 PyYAML = "^6.0"
 tiktok-downloader = "^0.3.3"
 tqdm = "^4.64.0"
+APScheduler = "^3.9.1"
+
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

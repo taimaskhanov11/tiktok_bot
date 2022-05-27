@@ -4,8 +4,9 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 from aiogram.types import ReplyKeyboardRemove
 
-from tiktok_bot.apps.bot import markups, temp
+from tiktok_bot.apps.bot import temp
 from tiktok_bot.apps.bot.handlers.utils import MailSender, MailStatus
+from tiktok_bot.apps.bot.markups.admin import admin_markups
 
 router = Router()
 
@@ -27,7 +28,7 @@ async def send_mail(call: types.CallbackQuery, state: FSMContext):
 
 async def send_mail_preview(message: types.Message, state: FSMContext):
     await state.update_data(mail=message.text)
-    await message.answer(message.text, reply_markup=markups.admin_menu.send_mail_preview())
+    await message.answer(message.text, reply_markup=admin_markups.send_mail_preview())
     await state.set_state(SendMail.select)
 
 
@@ -46,7 +47,7 @@ async def send_mail_add_button_start(call: types.CallbackQuery, state: FSMContex
 
 async def send_mail_add_button(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    markup = markups.admin_menu.send_mail_add_button(message.text)
+    markup = admin_markups.send_mail_add_button(message.text)
     await message.answer(data["mail"], reply_markup=markup)
     await state.update_data(markup=markup)
     await state.set_state(SendMail.select)
@@ -66,14 +67,14 @@ async def send_mail_done(call: types.CallbackQuery, state: FSMContext):
 async def send_mail_pause(call: types.CallbackQuery):
     temp.MAIL_SENDER.status = MailStatus.pause
     await temp.MAIL_SENDER.status_message.edit_reply_markup(
-        markups.admin_menu.send_mail_done(False)
+        admin_markups.send_mail_done(False)
     )
 
 
 async def send_mail_continue(call: types.CallbackQuery):
     temp.MAIL_SENDER.status = MailStatus.run
     await temp.MAIL_SENDER.status_message.edit_reply_markup(
-        markups.admin_menu.send_mail_done()
+        admin_markups.send_mail_done()
     )
 
 

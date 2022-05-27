@@ -1,6 +1,8 @@
-from .base import User, Chat
+from .base import User, Chat, AdvUser, SponsorChat
 
 __all__ = (
     "User",
-    "Chat"
+    "Chat",
+    "SponsorChat",
+    "AdvUser"
 )

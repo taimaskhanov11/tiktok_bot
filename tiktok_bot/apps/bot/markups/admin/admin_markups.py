@@ -4,34 +4,24 @@ from pprint import pprint
 from aiogram.types import InlineKeyboardMarkup
 from loguru import logger
 
-from tiktok_bot.apps.bot.callback_data.base_callback import ChatCallback
+from tiktok_bot.apps.bot.callback_data.base_callback import ChatCallback, SponsorChatCallback
 from tiktok_bot.apps.bot.markups.utils import get_inline_keyboard, get_inline_url_keyboard
 
 
 def admin_start():
     keyword = [
-        (("👥 Узнать количество пользователей.", "users_count"),),
-        (("📄 Список каналов и групп для подписки.", ChatCallback(pk=0, action="view").pack()),),
-        (("✍ Добавить канал для подписки.", ChatCallback(pk=0, action="new").pack()),),
+        (("📄 Список каналов для обязательной подписки.", ChatCallback(pk=0, action="view").pack()),),
+        (("✍ Добавить канал для обязательной подписки.", ChatCallback(pk=0, action="new").pack()),),
+        (("📄 Список спонсорских каналов.", SponsorChatCallback(pk=0, action="view").pack()),),
+        (("✍ Добавить спонсорский канал.", SponsorChatCallback(pk=0, action="new").pack()),),
+
+        (("📈 Статистика.", "statistics"),),
         (("🔖 Сделать рассылку.", "send_mail"),),
+        (("⚙ Настройки бота.", "bot_settings"),),
         # (("📋 Стартовое сообщение", "start_message"),),
     ]
 
     return get_inline_keyboard(keyword)
-
-
-def view_chats(chats):
-    keyboard = (
-        ((c.link, ChatCallback(pk=c.pk, action="touch").pack(),) for c in chats),
-    )
-    return get_inline_keyboard(keyboard)
-
-
-def touch_chat(chat):
-    keyboard = [
-        (("✍ Удалить.", ChatCallback(pk=chat.pk, action="delete").pack()),),
-    ]
-    return get_inline_keyboard(keyboard)
 
 
 def admin_button():

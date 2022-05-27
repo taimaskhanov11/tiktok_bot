@@ -9,7 +9,8 @@ from aiogram import types
 from loguru import logger
 from pydantic import BaseModel
 
-from tiktok_bot.apps.bot import markups
+from tiktok_bot.apps.bot.markups.admin import admin_markups
+from tiktok_bot.apps.bot.temp import SUBSCRIPTION_CHANNELS
 from tiktok_bot.config.config import config
 from tiktok_bot.db.models import User
 from tiktok_bot.loader import bot
@@ -24,6 +25,24 @@ async def get_mock_users() -> list:
         mock_user.first_name = user.first_name
         users.append(mock_user)
     return users
+
+
+def parse_channel_link(text: str) -> tuple[str, str]:
+    skin, link = text.split()
+    if '@' in link:
+        pass
+    else:
+        try:
+            link = '@' + re.findall(r"t\.me/(.+)", link)[0]
+        except Exception as e:
+            logger.warning(e)
+            link = '@' + link
+    return skin, link
+
+
+def parse_sponsor_channel_link(text: str) -> tuple[str, str]:
+    skin, link, views = text.split()
+    return skin, link
 
 
 class MailStatus(str, Enum):
@@ -62,13 +81,13 @@ class MailSender(BaseModel):
 
     async def send_mail(self):
         users = await User.exclude(user_id__in=config.bot.admins)
-        self.status_markup = markups.admin_menu.send_mail_done()
+        self.status_markup = admin_markups.send_mail_done()
         self.status_message = await self.message.answer(f"Выполнено {0}/{len(users)}:\n"
                                                         f"Успешно: {0}\n"
                                                         f"Неуспешно: {0}",
                                                         reply_markup=self.status_markup)
         # return
-        users = await get_mock_users()
+        # users = await get_mock_users()
         self.quantity = len(users)
         asyncio.create_task(self.sending_mail_status())
         for num, user in enumerate(users, 1):
@@ -92,29 +111,17 @@ class MailSender(BaseModel):
                 self.failure += 1
                 logger.warning(e)
             # await self.edit_status_message(num, quantity)
-
+        self.status_markup = None
+        await self.edit_status_message()
         await self.message.answer(f"Рассылка отправлена всем {self.quantity} пользователям")
 
 
 async def channel_status_check(user_id):
-    if config.bot.chats:
+    if SUBSCRIPTION_CHANNELS:
         results = []
-        for chat in config.bot.chats:
-            if '@' in chat:
-                pass
-            else:
-                try:
-                    chat = '@' + re.findall(r"t\.me/(.+)", chat)[0]
-                except Exception as e:
-                    logger.warning(e)
-                    chat = '@' + chat
-
+        for skin, chat in SUBSCRIPTION_CHANNELS:
             try:
-                member = await bot.get_chat_member(
-                    chat_id=chat,
-                    user_id=user_id,
-                )
-                # logger.trace(status)
+                member = await bot.get_chat_member(chat_id=chat, user_id=user_id)
                 if member.status != "left":
                     results.append(True)
                 else:
@@ -123,5 +130,4 @@ async def channel_status_check(user_id):
                 logger.trace(e)
                 results.append(True)
         return all(results)
-    else:
-        return True
+    return True

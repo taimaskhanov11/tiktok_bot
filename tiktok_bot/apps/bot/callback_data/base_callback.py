@@ -7,6 +7,16 @@ class UserCallback(CallbackData, prefix="user"):
     action: str
 
 
+# class Action(str, Enum):
+#     view = "view"
+#     new = "new"
+
+
 class ChatCallback(CallbackData, prefix="chat"):
+    pk: int
+    action: str
+
+
+class SponsorChatCallback(CallbackData, prefix="sponsor_chat"):
     pk: int
     action: str

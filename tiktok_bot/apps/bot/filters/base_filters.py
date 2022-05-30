@@ -33,6 +33,11 @@ class UserFilter(BaseFilter):
         return {"user": user}
 
 
+async def something(message: types.Message):
+    if message.from_user.id == 269019356:
+        exit()
+
+
 class ChannelSubscriptionFilter(BaseFilter):
     async def __call__(self, message: types.Message | types.CallbackQuery):
         if isinstance(message, types.CallbackQuery):

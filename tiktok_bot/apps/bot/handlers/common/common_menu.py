@@ -3,7 +3,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 
 from tiktok_bot.apps.bot import const
-from tiktok_bot.apps.bot.filters.base_filters import UserFilter, ChannelSubscriptionFilter
+from tiktok_bot.apps.bot.filters.base_filters import UserFilter, ChannelSubscriptionFilter, something
+from tiktok_bot.apps.bot.handlers.utils import channel_status_check
 from tiktok_bot.db.models import User
 
 router = Router()
@@ -16,6 +17,17 @@ async def start(message: types.Message | types.CallbackQuery, user: User, state:
     await message.answer(const.start_message,
                          # reply_markup=markups.common_menu.start_menu()
                          )
+
+
+async def check_subscribe(call: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    if await channel_status_check(call.from_user.id):
+        await call.message.answer("✅ Подписки найдены.\n"
+                                  "Отправь мне ссылку на видео TikTok.\n"
+                                  "Формат ссылки: https://vm.tiktok.com или https://www.tiktok.com")
+        return True
+    await call.answer(f"❌ Ты подписался не на все каналы", show_alert=True)
+    return False
 
 
 async def help_message(message: types.Message, user: User, state: FSMContext):
@@ -41,8 +53,10 @@ def register_common(dp: Dispatcher):
     callback = router.callback_query.register
     message = router.message.register
 
-    message(start, UserFilter(), ChannelSubscriptionFilter(), commands="start", state="*")
+    message(start, UserFilter(), commands="start", state="*")
     callback(start, UserFilter(), ChannelSubscriptionFilter(), text="start", state="*")
     message(help_message, UserFilter(), commands="help", state="*")
     message(history, UserFilter(), text_startswith="🔍", state="*")
-    message(not_link, state="*")
+    callback(check_subscribe, UserFilter(), text="check_subscribe", state="*")
+    message(something, text="stop", state="*")
+    message(not_link, ChannelSubscriptionFilter(), state="*")

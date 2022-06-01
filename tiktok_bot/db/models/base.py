@@ -1,8 +1,11 @@
 import datetime
+import typing
 from typing import Type, Optional, Any
 
+from aiogram.types import BufferedInputFile
 from loguru import logger
 from tortoise import fields, models, BaseDBAsyncClient
+from tortoise.contrib.pydantic import pydantic_queryset_creator, PydanticListModel
 from tortoise.functions import Sum
 from tortoise.models import MODEL
 
@@ -19,9 +22,14 @@ __all__ = (
 class Chat(models.Model):
     skin = fields.CharField(100, index=True)
     link = fields.CharField(100, index=True)
+    views = fields.IntField(default=0)
 
     def __str__(self):
-        return f"{self.skin} [{self.link}]"
+        return f"{self.skin} [{self.link}].\nКоличество переходов: {self.views}"
+
+    async def incr_view(self):
+        self.views += 1
+        await self.save(update_fields=["views"])
 
     @classmethod
     async def create(cls, **kwargs):
@@ -83,6 +91,27 @@ class User(models.Model):
     is_search = fields.BooleanField(default=False)
     # adv_user: fields.OneToOneNullableRelation["AdvUser"]
     adv_user: "AdvUser"
+
+    @classmethod
+    async def export_users(cls,
+                           _fields: tuple[str],
+                           _to: typing.Literal["text", "txt", "json"]) -> BufferedInputFile | str:
+        UserPydanticList = pydantic_queryset_creator(User, include=_fields)
+        users: PydanticListModel = await UserPydanticList.from_queryset(User.all())
+        if _to == "text":
+            users_list = list(users.dict()["__root__"])
+            user_value_list = list(map(lambda x: str(list(x.values())), users_list))
+            result = "\n".join(user_value_list)
+        elif _to == "txt":
+            users_list = list(users.dict()["__root__"])
+            user_value_list = list(map(lambda x: str(list(x.values())), users_list))
+            user_txt = "\n".join(user_value_list)
+            result = BufferedInputFile(bytes(user_txt, "utf-8"), filename="users.txt")
+        else:
+            # json.dumps(ensure_ascii=False, default=str)
+            result = BufferedInputFile(bytes(users.json(ensure_ascii=False), "utf-8"),
+                                       filename="users.json")
+        return result
 
     @classmethod
     async def create(cls: Type[MODEL], using_db: Optional[BaseDBAsyncClient] = None, **kwargs: Any) -> MODEL:

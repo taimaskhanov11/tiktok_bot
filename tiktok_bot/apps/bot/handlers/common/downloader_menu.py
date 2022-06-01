@@ -3,11 +3,12 @@ import asyncio
 from aiogram import Dispatcher, Router, types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile
+from aiogram.utils.chat_action import ChatActionSender
 from loguru import logger
 from tiktok_downloader import snaptik
 
 from tiktok_bot.apps.bot import temp
-from tiktok_bot.apps.bot.filters.base_filters import UserFilter, ChannelSubscriptionFilter
+from tiktok_bot.apps.bot.filters.base_filters import UserFilter, ChannelSubscriptionFilter, something
 from tiktok_bot.apps.bot.markups.common import common_markups
 from tiktok_bot.db.models import User, AdvUser, SponsorChat
 
@@ -42,20 +43,20 @@ async def download(message: types.Message, user: User, state: FSMContext):
     async with user:
         try:
             await message.answer("Скачиваю видео, ожидайте...")
-            # async with ChatActionSender.upload_video(bot=message.via_bot, chat_id=message.chat.id):
-            bytes_storage = await asyncio.to_thread(download_file, message.text)
-            await message.answer_video(
-                BufferedInputFile(bytes_storage,
-                                  filename=f"result_{message.from_user.id}.mp4"),
-                caption="Вот твое видео: скачано с помощью @tiktokksave_bot",
-                reply_markup=common_markups.download(sponsor_chat, message.text))
+            async with ChatActionSender.upload_video(bot=message.via_bot, chat_id=message.chat.id):
+                bytes_storage = await asyncio.to_thread(download_file, message.text)
+                await message.answer_video(
+                    BufferedInputFile(bytes_storage,
+                                      filename=f"result_{message.from_user.id}.mp4"),
+                    caption="Вот твое видео: скачано с помощью @tiktokksave_bot",
+                    reply_markup=common_markups.download(sponsor_chat, message.text))
             await message.answer("Скачиваю музыку из видео...")
-            # async with ChatActionSender.upload_voice(bot=message.via_bot, chat_id=message.chat.id):
-            await message.answer_audio(
-                BufferedInputFile(bytes_storage,
-                                  filename=f"result_{message.from_user.id}.mp4"),
-                caption="Вот музыка из видео: скачано с помощью @tiktokksave_bot",
-                reply_markup=common_markups.download_audio())
+            async with ChatActionSender.upload_voice(bot=message.via_bot, chat_id=message.chat.id):
+                await message.answer_audio(
+                    BufferedInputFile(bytes_storage,
+                                      filename=f"result_{message.from_user.id}.mp4"),
+                    caption="Вот музыка из видео: скачано с помощью @tiktokksave_bot",
+                    reply_markup=common_markups.download_audio())
             temp.TODAY_DOWNLOADS += 1
             temp.SPONSOR_CHANNELS_VIEW += 1
             if sponsor_chat:

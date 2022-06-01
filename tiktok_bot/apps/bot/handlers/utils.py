@@ -12,8 +12,29 @@ from pydantic import BaseModel
 from tiktok_bot.apps.bot.markups.admin import admin_markups
 from tiktok_bot.apps.bot.temp import SUBSCRIPTION_CHANNELS
 from tiktok_bot.config.config import config
-from tiktok_bot.db.models import User
+from tiktok_bot.db.models import User, Chat
 from tiktok_bot.loader import bot
+
+fields_nums = {
+    "user_id": "1",
+    "username": "2",
+    "first_name": "3",
+    "last_name": "4",
+}
+
+async def part_sending(message, answer):
+    if len(answer) > 4096:
+        for x in range(0, len(answer), 4096):
+            y = x + 4096
+            await message.answer(answer[x:y])
+    else:
+        await message.answer(answer)
+
+def parse_user_fields(fields_text: str) -> tuple:
+    if "0" in fields_text:
+        return ()
+    else:
+        return tuple(filter(lambda x: fields_nums[x] in fields_text, fields_nums))
 
 
 async def get_mock_users() -> list:
@@ -121,13 +142,15 @@ async def channel_status_check(user_id):
         results = []
         for skin, chat in SUBSCRIPTION_CHANNELS:
             try:
+                db_chat = await Chat.get(skin=skin)
+                await db_chat.incr_view()
                 member = await bot.get_chat_member(chat_id=chat, user_id=user_id)
                 if member.status != "left":
                     results.append(True)
                 else:
                     results.append(False)
             except Exception as e:
-                logger.trace(e)
+                logger.warning(f"{chat}|{e}")
                 results.append(True)
         return all(results)
     return True

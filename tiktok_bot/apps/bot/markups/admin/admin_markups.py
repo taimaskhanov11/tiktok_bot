@@ -7,6 +7,8 @@ from loguru import logger
 from tiktok_bot.apps.bot.callback_data.base_callback import ChatCallback, SponsorChatCallback
 from tiktok_bot.apps.bot.markups.utils import get_inline_keyboard, get_inline_url_keyboard
 
+admin_back_buttons = ("⬅️ Назад", "admin")
+
 
 def admin_start():
     keyword = [
@@ -18,6 +20,7 @@ def admin_start():
         (("📈 Статистика.", "statistics"),),
         (("🔖 Сделать рассылку.", "send_mail"),),
         (("⚙ Настройки бота.", "bot_settings"),),
+        (("👥 Экспорт пользователей.", "export_users"),),
         # (("📋 Стартовое сообщение", "start_message"),),
     ]
 
@@ -27,6 +30,32 @@ def admin_start():
 def admin_button():
     keyboard = [
         (("Админ панель", "admin"),),
+    ]
+    return get_inline_keyboard(keyboard)
+
+
+def back():
+    keyboard = [
+        [admin_back_buttons]
+    ]
+    return get_inline_keyboard(keyboard)
+
+
+def export_users():
+    keyboard = [
+        (("Отправить сообщением", "test"),),
+        (("Отправить тестовый файл", "txt"),),
+        (("Отправить сообщением", "test"),),
+    ]
+    return get_inline_keyboard(keyboard)
+
+
+def export_users_send_type():
+    keyboard = [
+        (("Отправить сообщением", "text"),),
+        (("Отправить тестовый файл", "txt"),),
+        (("Отправить json-file", "json"),),
+        [admin_back_buttons]
     ]
     return get_inline_keyboard(keyboard)
 
@@ -59,7 +88,11 @@ def send_mail_done(status: bool = True):
 @logger.catch
 def parse_buttons(text: str):
     keyboard = []
-    change_keyboard = re.split(r'\s\n|\w\n|$', text)[:-1]
+    # change_keyboard = re.split(r'\s\n|\w\n|$', text)[:-1]
+    # change_keyboard = re.split(r'[(\s)\w](\n)', text)[:-1]
+    # change_keyboard = re.split(r'\s\n|[^|]\n', text)
+    change_keyboard = re.split(r'(?<=\w\n)', text)
+    # pprint(change_keyboard)
     for but_parent in change_keyboard:
         keyboard.append(
             list(map(lambda x: list(map(lambda x: x.strip(), x.split('-'))), but_parent.split("|\n")))
@@ -82,10 +115,24 @@ def send_mail_add_button(text: str) -> InlineKeyboardMarkup:
     return inline_url_keyboard
 
 
+def send_mail_add_button_in_current(markup: InlineKeyboardMarkup) -> InlineKeyboardMarkup:
+    keyboard = [
+        # (("➕ Добавить еще url кнопки", "add_button"),),
+        (("➕ Добавить новый url кнопки", "add_button"),),
+        (("✅ Подтвердить", "accept"),),
+        (("❌ Отменить", "cancel"),),
+    ]
+
+    inline_keyboard = get_inline_keyboard(keyboard)
+    new_markup = markup.copy()
+    new_markup.inline_keyboard.extend(inline_keyboard.inline_keyboard)
+    return markup
+
+
 if __name__ == '__main__':
     text = ("Кнопка 1 - https://www.example1.com |\n"
-            "Кнопка 2 - https://www.example2.com |\n"
-            "Кнопка 3 - https://www.example3.com \n"
+            "Кнопка 2 - https://www.example2.com\n"
+            "Кнопка 3 - https://www.example3.com\n"
             "Кнопка 4 - https://www.example4.com")
     # pprint(send_mail_preview().inline_keyboard)
     pprint(parse_buttons(text))

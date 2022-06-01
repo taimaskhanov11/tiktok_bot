@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from aiogram import Bot
+from aiogram import Bot, F
 from aiogram.types import BotCommand
 
 from tiktok_bot.apps.bot.handlers.admin import register_admin_handlers
@@ -47,7 +47,7 @@ async def start():
     await init_db(**config.db.dict())
 
     # Меню админа
-    # dp.message.filter(F.chat.type == "private")
+    dp.message.filter(F.chat.type == "private")
     # Регистрация хэндлеров
     # register_admin(dp)
     register_admin_handlers(dp)

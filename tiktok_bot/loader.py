@@ -10,7 +10,7 @@ bot = Bot(token=config.bot.token,
           # parse_mode="markdown"
           )
 storage = MemoryStorage()
-dp = Dispatcher(storage=storage)
+dp:Dispatcher = Dispatcher(storage=storage)
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
 

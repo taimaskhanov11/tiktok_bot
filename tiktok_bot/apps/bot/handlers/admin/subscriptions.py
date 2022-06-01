@@ -7,7 +7,7 @@ from loguru import logger
 
 from tiktok_bot.apps.bot.callback_data.base_callback import ChatCallback, SponsorChatCallback
 from tiktok_bot.apps.bot.handlers.utils import parse_channel_link
-from tiktok_bot.apps.bot.markups.admin import subscriptions_markups
+from tiktok_bot.apps.bot.markups.admin import subscriptions_markups, admin_markups
 from tiktok_bot.db.models.base import Chat, SponsorChat
 
 router = Router()
@@ -35,7 +35,7 @@ async def new_chat(call: types.CallbackQuery, state: FSMContext):
                               f"Введите ссылку по которому должны будут пройти пользователи и через пробел фактическую ссылку на канал для проверки ботом\n"
                               f"Например:\n"
                               f"https://t.me/+bIBc0e-525k2MThi https://t.me/mychannel",
-                              reply_markup=ReplyKeyboardRemove())
+                              reply_markup=admin_markups.back())
     await state.set_state(NewChat.done)
 
 
@@ -44,10 +44,10 @@ async def new_chat_done(message: types.Message, state: FSMContext):
         await state.clear()
         skin, link = parse_channel_link(message.text)
         chat = await Chat.create(skin=skin, link=link)
-        await message.answer(f"Чат для подписки: {chat} успешно добавлен")
+        await message.answer(f"Чат для подписки: {chat}\n успешно добавлен",reply_markup=admin_markups.back())
     except Exception as e:
         logger.warning(e)
-        await message.answer("Неправильный ввод")
+        await message.answer("Неправильный ввод",reply_markup=admin_markups.back())
 
 
 async def touch_chat(call: types.CallbackQuery, callback_data: ChatCallback, state: FSMContext):
@@ -78,19 +78,20 @@ async def sponsor_view_chats(call: types.CallbackQuery, state: FSMContext):
 
 async def sponsor_new_chat(call: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    await call.message.answer(f"Введите название кнопки, ссылку и количество необходимых просмотров через пробел\n"
+    await call.message.answer(f"Введите название кнопки, ссылку и количество необходимых просмотров через запятую\n"
                               f"Например:\n"
-                              f"Подписывайтесь https://t.me/mychannel 500",
-                              reply_markup=ReplyKeyboardRemove())
+                              f"Подписывайтесь,https://t.me/mychannel,500",
+                              reply_markup=admin_markups.back())
+
     await state.set_state(NewSponsorChat.done)
 
 
 async def sponsor_new_chat_done(message: types.Message, state: FSMContext):
     try:
         await state.clear()
-        skin, link, views = message.text.split()
+        skin, link, views = tuple(map(lambda x: x.strip(), message.text.split(",")))
         await SponsorChat.create(skin=skin, link=link, views=views)
-        await message.answer("Спонсорский чат успешно добавлен")
+        await message.answer("Спонсорский чат успешно добавлен",reply_markup=admin_markups.back())
     except Exception as e:
         logger.warning(e)
         await message.answer("Неправильный ввод")

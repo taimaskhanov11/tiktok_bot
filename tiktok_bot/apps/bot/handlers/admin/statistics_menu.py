@@ -3,7 +3,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 from tiktok_bot.apps.bot import temp
-from tiktok_bot.apps.bot.markups.admin import statistics_markups
+from tiktok_bot.apps.bot.markups.admin import statistics_markups, admin_markups
 from tiktok_bot.apps.bot.temp import ONLINE_USERS
 from tiktok_bot.db.models import User, AdvUser
 
@@ -36,7 +36,7 @@ async def statistics_start(call: types.CallbackQuery, state: FSMContext):
         f"📊 Количество скачивания сегодня: {today_download_count}\n"
         f"📊 Количество переходов по спонсорским ссылкам: {temp.SPONSOR_CHANNELS_VIEW}\n"
         f"📊 Количество просмотров по спонсорским ссылкам: {temp.SPONSOR_CHANNELS_VIEW}\n",
-        # reply_markup=statistics_markups.statistics_start()
+        reply_markup=admin_markups.back()
     )
 
 

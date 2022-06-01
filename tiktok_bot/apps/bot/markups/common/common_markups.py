@@ -34,6 +34,6 @@ def channel_status_check(channels: list[tuple[str, str]]):
         )
     column_keyboard = get_as_column(keyboard)
     ikeyboard = get_inline_url_keyboard(column_keyboard)
-    inline_button = get_inline_button(("✅ Я подписался", "start"))
+    inline_button = get_inline_button(("✅ Я подписался", "check_subscribe"))
     ikeyboard.inline_keyboard.append([inline_button])
     return ikeyboard
